@@ -1,2 +1,2 @@
-FROM node:12-alpine
+FROM node:lts-alpine
 RUN apk add git
