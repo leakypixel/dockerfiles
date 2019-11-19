@@ -1,6 +1,6 @@
 FROM multiarch/debian-debootstrap:amd64-jessie-slim
 
-ARG  snapcast_version=0.16.0
+ARG  snapcast_version=0.15.0
 
 RUN  apt-get update \
   && apt-get install -y wget ca-certificates \
