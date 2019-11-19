@@ -8,7 +8,7 @@ jenkins:
   group_add:
     - "${DOCKER_GROUP}"
   volumes:
-    - "/var/run/docker.sock:/tmp/docker.sock:ro"
+    - "/var/run/docker.sock:/var/run/docker.sock"
     - /path/to/your/config:/var/jenkins_home:rw"
     - "/etc/localtime:/etc/localtime:ro"
 ```
