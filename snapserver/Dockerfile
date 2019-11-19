@@ -12,4 +12,4 @@ RUN  dpkg -i snapserver_${snapcast_version}_amd64.deb \
   && rm -rf /var/lib/apt/lists/*
 RUN snapserver -v
 EXPOSE 1704 1705
-ENTRYPOINT ["/bin/bash","-c","source /etc/default/snapserver && snapserver $SNAPSERVER_OPTS"]
+ENTRYPOINT ["/bin/bash","-c","source /etc/default/snapserver && /usr/bin/snapserver $SNAPSERVER_OPTS"]
