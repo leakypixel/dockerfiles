@@ -1,6 +1,6 @@
 FROM debian:stable
 
-ARG  snapcast_version=0.17.1
+ARG  snapcast_version=0.19.0
 
 RUN  apt-get update \
   && apt-get install -y wget ca-certificates \
@@ -12,6 +12,6 @@ RUN  dpkg -i snapserver_${snapcast_version}-1_amd64.deb \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf snapserver_${snapcast_version}-1_amd64.deb
 RUN /usr/bin/snapserver -v
-EXPOSE 1704 1705
+EXPOSE 1704 1705 1780
 ENTRYPOINT ["/bin/bash","-c","/usr/bin/snapserver"]
 CMD  ["-c /etc/snapserver.conf"]
