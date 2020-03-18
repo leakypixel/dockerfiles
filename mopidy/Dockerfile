@@ -1,15 +1,29 @@
-FROM ubuntu:bionic
-RUN  apt-get update
-RUN  apt-get install -y software-properties-common
-RUN  apt-add-repository universe
-RUN  apt-get install -y wget
-RUN  wget -q -O - https://apt.mopidy.com/mopidy.gpg | apt-key add -
-RUN  wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/stretch.list
-RUN  add-apt-repository ppa:jean-francois-dockes/upnpp1 -y
-RUN  apt-get update --fix-missing
-RUN  apt-get install -y python-pip upmpdcli mopidy build-essential gstreamer1.0-plugins-base gstreamer1.0-plugins-bad gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly libspotify12 python-spotify
-RUN  apt-get remove -y python-pyasn1
-RUN  pip install \
+FROM archlinux
+# Following taken from https://github.com/oblique/dockerfiles/blob/f993083f640dcebaa07132e77ad10bc6d36f22e2/archlinux-yay/Dockerfile#L3
+# but not using for a base image so we can benefit from auto builds as base
+# archlinux is pushed.
+RUN echo '[multilib]' >> /etc/pacman.conf && \
+    echo 'Include = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf && \
+    pacman --noconfirm -Syyu && \
+    pacman --noconfirm -S mopidy python-pip base-devel git && \
+    useradd -m -r -s /bin/bash aur && \
+    passwd -d aur && \
+    echo 'aur ALL=(ALL) ALL' > /etc/sudoers.d/aur && \
+    mkdir -p /home/aur/.gnupg && \
+    echo 'standard-resolver' > /home/aur/.gnupg/dirmngr.conf && \
+    chown -R aur:aur /home/aur && \
+    mkdir /build && \
+    chown -R aur:aur /build && \
+    cd /build && \
+    sudo -u aur git clone --depth 1 https://aur.archlinux.org/yay.git && \
+    cd yay && \
+    sudo -u aur makepkg --noconfirm -si && \
+    sudo -u aur yay --afterclean --removemake --save && \
+    pacman -Qtdq | xargs -r pacman --noconfirm -Rcns && \
+    rm -rf /home/aur/.cache && \
+    rm -rf /build
+RUN sudo -u aur yay -S --noconfirm python-pyspotify
+RUN pip install \
       Mopidy-Mobile \
       Mopidy-Podcast-iTunes \
       Mopidy-Podcast \
@@ -19,9 +33,8 @@ RUN  pip install \
       Mopidy-Spotify \
       Mopidy-Party \
       mopidy-musicbox-webclient \
-      Mopidy-Local-SQLite \
+      Mopidy-Local \
       Mopidy-Youtube
-
 EXPOSE 6600 6680
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
