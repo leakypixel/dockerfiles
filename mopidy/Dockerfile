@@ -34,6 +34,7 @@ RUN pip install \
       Mopidy-Party \
       mopidy-musicbox-webclient \
       Mopidy-Local \
+      Mopidy-MPD \
       Mopidy-Youtube
 EXPOSE 6600 6680
 COPY ./entrypoint.sh /entrypoint.sh
