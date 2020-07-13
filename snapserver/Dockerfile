@@ -1,11 +1,10 @@
+# Librespot builder
 FROM rust:1.42 AS librespot
+ARG LIBRESPOT_VERSION=0.1.1
 
 RUN apt-get update \
  && apt-get -y install build-essential portaudio19-dev curl unzip \
  && apt-get clean && rm -fR /var/lib/apt/lists
-
-ARG LIBRESPOT_VERSION=0.1.1
-
 RUN cd /tmp \
  && curl -sLO https://github.com/librespot-org/librespot/archive/v0.1.1.zip \
  && unzip v${LIBRESPOT_VERSION}.zip \
@@ -14,6 +13,8 @@ RUN cd /tmp \
  && cargo build --release \
  && chmod +x target/release/librespot
 
+
+# Base builder image for shairport and snapcast, all deps
 FROM debian:stable AS build-base
 RUN echo "deb http://deb.debian.org/debian buster-backports main" >> \
     /etc/apt/sources.list.d/buster-backports.list
@@ -50,11 +51,11 @@ RUN apt-get update \
     libavahi-client-dev \
     avahi-daemon \
     expat
-
 WORKDIR /
 
-FROM build-base AS shairport
 
+# Build shairport and apple ALAC
+FROM build-base AS shairport
 ARG ALAC_VERSION=master
 ARG SHAIRPORT_SYNC_VERSION=3.3.6
 
@@ -74,29 +75,41 @@ RUN ./configure --with-stdout --with-pipe --with-soxr --with-avahi \
       --with-ssl=openssl --with-metadata --with-apple-alac
 RUN make -j $(nproc)
 RUN make install
-RUN apt-get clean && rm -fR /var/lib/apt/lists
 
 
+# Build snapserver with expat support
 FROM build-base AS snapserver
-
 ARG SNAPCAST_VERSION=v0.20.0
+
 RUN git clone --recursive https://github.com/badaix/snapcast.git
 WORKDIR snapcast
 RUN git checkout "$SNAPCAST_VERSION"
-RUN apt update && apt install -y 
 RUN ADD_CFLAGS="-DHAS_EXPAT=1 -lexpat" make
 
 
+# Runtime image, copying artifacts from builder images
 FROM debian:stable
-RUN apt update && apt install -y libexpat1 libvorbisenc2 \
-libopus0 libflac++6v5 libsoxr0 libavahi-client3 libatomic1 \
-  openssl libasound2 libconfig9 libdaemon0 libpopt0
+RUN apt update && \
+    apt install -y \
+    libexpat1 \
+    libvorbisenc2 \
+    libopus0 \
+    libflac++6v5 \
+    libsoxr0 \
+    libavahi-client3 \
+    libatomic1 \
+    openssl \
+    libasound2 \
+    libconfig9 \
+    libdaemon0 \
+    libpopt0
 COPY --from=librespot /tmp/librespot/target/release/librespot /usr/bin/
 COPY --from=shairport /usr/local/bin/shairport-sync /usr/bin/shairport-sync
 COPY --from=shairport /usr/local/etc/shairport-sync.conf /usr/local/etc/shairport-sync.conf
 COPY --from=shairport /usr/local/lib/libalac.so.0 /lib
 COPY --from=snapserver /snapcast/server/snapserver /usr/bin
 RUN /usr/bin/snapserver -v
+RUN apt-get clean && rm -fR /var/lib/apt/lists
 EXPOSE 1704 1705 1780 5000
 ENTRYPOINT ["/bin/bash","-c","/usr/bin/snapserver"]
 CMD  ["-c /etc/snapserver.conf"]
