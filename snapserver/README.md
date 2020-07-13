@@ -21,9 +21,12 @@ snapserver:
         - '1780:1780' # HTTP JSON RPC
         - '5000:5000' # Shairport control
         - '6000-6010:6000-6010/udp' # Shairport data 
-
+    environment:
+      - 'DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket' # For avahi publishing
     volumes:
         - 'fifo:/tmp/'
         - '/path/to/your/snapserver.conf:/etc/snapserver.conf'
         - '/path/to/your/snapserver/data/:/var/lib/snapserver'
+        - '/path/to/your/shairport-sync.conf:/usr/local/etc/shairport-sync.conf'
+        - '/run/dbus/system_bus_socket:/run/dbus/system_bus_socket' # For avahi publishing
 ```
