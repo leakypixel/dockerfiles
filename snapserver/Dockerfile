@@ -90,6 +90,7 @@ RUN ADD_CFLAGS="-DHAS_EXPAT=1 -lexpat" make
 # Runtime image, copying artifacts from builder images
 FROM debian:stable
 RUN apt update && \
+  DEBIAN_FRONTEND=noninteractive \
     apt install -y \
     libexpat1 \
     libvorbisenc2 \
@@ -103,6 +104,7 @@ RUN apt update && \
     libconfig9 \
     libdaemon0 \
     libpopt0
+
 COPY --from=librespot /tmp/librespot/target/release/librespot /usr/bin/
 COPY --from=shairport /usr/local/bin/shairport-sync /usr/bin/shairport-sync
 COPY --from=shairport /usr/local/etc/shairport-sync.conf /usr/local/etc/shairport-sync.conf
