@@ -79,7 +79,7 @@ RUN make install
 
 # Build snapserver with expat support
 FROM build-base AS snapserver
-ARG SNAPCAST_VERSION=v0.20.0
+ARG SNAPCAST_VERSION=v0.22.0
 
 RUN git clone --recursive https://github.com/badaix/snapcast.git
 WORKDIR snapcast
