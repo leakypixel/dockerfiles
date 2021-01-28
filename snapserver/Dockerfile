@@ -1,6 +1,6 @@
 # Librespot builder
 FROM rust:1.42 AS librespot
-ARG LIBRESPOT_VERSION=0.1.1
+ARG LIBRESPOT_VERSION=0.1.3
 
 RUN apt-get update \
  && apt-get -y install build-essential portaudio19-dev curl unzip \
@@ -57,7 +57,7 @@ WORKDIR /
 # Build shairport and apple ALAC
 FROM build-base AS shairport
 ARG ALAC_VERSION=master
-ARG SHAIRPORT_SYNC_VERSION=3.3.6
+ARG SHAIRPORT_SYNC_VERSION=3.3.7
 
 RUN git clone "https://github.com/mikebrady/alac.git"
 WORKDIR alac
@@ -79,7 +79,7 @@ RUN make install
 
 # Build snapserver with expat support
 FROM build-base AS snapserver
-ARG SNAPCAST_VERSION=v0.22.0
+ARG SNAPCAST_VERSION=v0.23.0
 
 RUN git clone --recursive https://github.com/badaix/snapcast.git
 WORKDIR snapcast
