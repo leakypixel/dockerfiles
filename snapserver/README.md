@@ -1,4 +1,4 @@
-Runs v0.20.0 of [snapcast](https://github.com/badaix/snapcast) on the
+Runs v0.25.0 of [snapcast](https://github.com/badaix/snapcast) on the
 latest debian:stable base image.
 
 You'll need to supply a snapserver.conf, the default can be found [here](https://github.com/badaix/snapcast/blob/master/server/etc/snapserver.conf) as a reference.
